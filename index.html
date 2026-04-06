@@ -1343,11 +1343,22 @@ async function tryCoachLogin() {
     showTracker();
   } catch(e) {
     var errEl = document.getElementById("coach-pw-error");
-    errEl.textContent = "Invalid email or password";
     document.getElementById("coach-pw").value = "";
-    setTimeout(function() { errEl.textContent = ""; }, 2400);
     if (pwBtn) { pwBtn.disabled = false; pwBtn.textContent = "Enter"; }
     if (gBtn) gBtn.disabled = false;
+    // Check if this email is linked to Google so we can give a helpful message
+    if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
+      try {
+        var methods = await firebase.auth().fetchSignInMethodsForEmail(email);
+        if (methods.indexOf("google.com") !== -1) {
+          errEl.textContent = "This account uses Google \u2014 use the button above";
+          setTimeout(function() { errEl.textContent = ""; }, 4000);
+          return;
+        }
+      } catch(_) {}
+    }
+    errEl.textContent = "Invalid email or password";
+    setTimeout(function() { errEl.textContent = ""; }, 2400);
   }
 }
 function showTracker() { document.getElementById("coach-login-panel").style.display="none"; document.getElementById("tracker-panel").style.display="block"; tRenderQueue(); }
