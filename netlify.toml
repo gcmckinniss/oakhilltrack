@@ -2,6 +2,11 @@
   publish = "."
   command = ""
 
+[build.environment]
+  # Firebase API keys are designed to be public — security is enforced via
+  # Firebase Security Rules and Authorized Domains, not key secrecy.
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyAS722iY5fXNLoaimZ-MRUXRbTbp0ow8QY"
+
 [context.production]
   branch = "main"
 
