@@ -1,0 +1,9 @@
+[build]
+  publish = "."
+
+[functions]
+  directory = "functions"
+  node_bundler = "nft"
+
+[functions.claude]
+  timeout = 30
