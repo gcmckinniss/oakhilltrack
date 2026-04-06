@@ -359,6 +359,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
 .stnd-state-msg{padding:2.5rem 0;text-align:center;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
 .stnd-state-msg a{color:var(--dim);text-decoration:none;transition:color .15s;}
 .stnd-state-msg a:hover{color:var(--white);}
+.stnd-edit-tab{font-family:"LeagueSpartan",sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:.38rem 1rem;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;border-radius:2px;transition:all .15s;}
+.stnd-edit-tab:hover{color:var(--white);border-color:rgba(255,255,255,.28);}
+.stnd-edit-tab.active{color:var(--white);background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22);}
+.stnd-ed-block{margin-bottom:1.5rem;}
+.stnd-ed-label{font-size:.56rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-bottom:.6rem;}
+.stnd-ed-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;}
+.stnd-ed-num{font-size:.66rem;font-weight:700;color:var(--muted);width:1rem;flex-shrink:0;}
+.stnd-ed-input{font-family:"LeagueSpartan",sans-serif;background:var(--dark2);border:1px solid var(--border);color:var(--white);font-size:.8rem;padding:.4rem .65rem;outline:none;flex:1;transition:border-color .15s;}
+.stnd-ed-input:focus{border-color:rgba(255,255,255,.3);}
+.stnd-ed-mark{flex:0 0 90px;}
 
 /* WORKOUTS */
 .week-meta{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);}
@@ -1030,6 +1040,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
             <button class="tr-tab" onclick="switchTTab(this,'t-workout')">Import Workout</button>
             <button class="tr-tab" onclick="switchTTab(this,'t-past')">Past Workouts</button>
             <button class="tr-tab" onclick="switchTTab(this,'t-videos')">Videos</button>
+            <button class="tr-tab" onclick="switchTTab(this,'t-standings')">Standings</button>
           </div>
         </div>
       </div>
@@ -1159,6 +1170,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
           </div>
         </div>
         <div id="v-list"><div class="t-empty">No videos added yet</div></div>
+      </div>
+
+      <div class="t-view" id="t-standings">
+        <p class="t-eyebrow">Ohio Division IV &mdash; Boys</p>
+        <h3 class="t-heading">Edit Standings</h3>
+        <div class="t-rule"></div>
+        <div style="display:flex;gap:.3rem;margin-bottom:1.5rem">
+          <button class="stnd-edit-tab active" onclick="switchStndEdit(this,'state')">State</button>
+          <button class="stnd-edit-tab" onclick="switchStndEdit(this,'regional')">Regional</button>
+          <button class="stnd-edit-tab" onclick="switchStndEdit(this,'district')">District</button>
+        </div>
+        <div id="stnd-editor-wrap"></div>
+        <div style="margin-top:1.25rem;display:flex;align-items:center;gap:1rem">
+          <button class="t-add" id="stnd-save-btn" onclick="saveStndEditor()">Save</button>
+          <span style="font-size:.58rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Copy top 4 from <a href="https://www.athletic.net/track-and-field-outdoor/usa/high-school/ohio/division4" target="_blank" rel="noopener" style="color:var(--dim)">Athletic.net &#8599;</a></span>
+        </div>
       </div>
 
     </div>
@@ -1543,20 +1570,20 @@ function switchTTab(btn, id) {
   document.querySelectorAll(".t-view").forEach(function(v){v.classList.remove("active");});
   document.querySelectorAll(".tr-tab").forEach(function(b){b.classList.remove("active");});
   document.getElementById(id).classList.add("active"); btn.classList.add("active");
-  if (id==="t-rankings") tRenderRankings();
-  if (id==="t-history")  tRenderHistory();
-  if (id==="t-videos")   vRender();
-  if (id==="t-past")     renderPastCoach();
+  if (id==="t-rankings")  tRenderRankings();
+  if (id==="t-history")   tRenderHistory();
+  if (id==="t-videos")    vRender();
+  if (id==="t-past")      renderPastCoach();
+  if (id==="t-standings") loadStndEditor(stndEditScope);
 }
 
 // ── STANDINGS ─────────────────────────────────────────────────
 var stndActiveType = 'state';
-var stndLoaded = {};
-var STND_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 var STND_EVENTS = ['100 Meter Dash', '200 Meter Dash', '400 Meter Dash', 'Pole Vault'];
+var STND_KEYS   = {'100 Meter Dash':'100m','200 Meter Dash':'200m','400 Meter Dash':'400m','Pole Vault':'vault'};
 var STND_LABELS = {'100 Meter Dash':'100M','200 Meter Dash':'200M','400 Meter Dash':'400M','Pole Vault':'Vault'};
 var STND_SOURCES = {
-  state: 'https://www.athletic.net/track-and-field-outdoor/usa/high-school/ohio/division4',
+  state:    'https://www.athletic.net/track-and-field-outdoor/usa/high-school/ohio/division4',
   regional: 'https://www.athletic.net/TrackAndField/rankings/list/178540/m',
   district: 'https://www.athletic.net/TrackAndField/rankings/list/178541/m'
 };
@@ -1565,7 +1592,6 @@ function switchStnd(btn, type) {
   document.querySelectorAll('.stnd-scope-tab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   stndActiveType = type;
-  // Update source link
   var srcLink = document.querySelector('.stnd-source-link');
   if (srcLink) srcLink.href = STND_SOURCES[type] || STND_SOURCES.state;
   loadStnd(type);
@@ -1574,60 +1600,32 @@ function switchStnd(btn, type) {
 function loadStnd(type) {
   var panel = document.getElementById('stnd-panel');
   if (!panel) return;
-
-  // Check localStorage cache
-  var cacheKey = 'stnd_' + type + '_v2';
-  var tsKey    = 'stnd_ts_' + type + '_v2';
-  var cached   = null;
-  var ts       = 0;
-  try {
-    cached = localStorage.getItem(cacheKey);
-    ts     = parseInt(localStorage.getItem(tsKey) || '0', 10);
-  } catch(e){}
-
-  if (cached && (Date.now() - ts < STND_CACHE_TTL)) {
-    try {
-      renderStnd(panel, JSON.parse(cached), ts);
-      return;
-    } catch(e){}
-  }
-
-  // Show skeleton
   panel.innerHTML = '<div class="stnd-state-msg">Loading\u2026</div>';
 
-  fetch('/.netlify/functions/rankings?type=' + type)
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      var now = Date.now();
-      try {
-        localStorage.setItem(cacheKey, JSON.stringify(data));
-        localStorage.setItem(tsKey, String(now));
-      } catch(e){}
-      renderStnd(panel, data, now);
-    })
-    .catch(function() {
-      renderStndError(panel, type);
+  dbGet('standings/' + type).then(function(data) {
+    if (!data) { renderStndEmpty(panel, type); return; }
+    // data is { '100m': [{place,name,school,mark}, ...], ... }
+    var results = {};
+    STND_EVENTS.forEach(function(ev) {
+      results[ev] = data[STND_KEYS[ev]] || [];
     });
+    renderStnd(panel, results);
+  });
 }
 
-function renderStnd(panel, data, ts) {
-  var results = data.results || {};
+function renderStnd(panel, results) {
   var hasData = STND_EVENTS.some(function(e){ return results[e] && results[e].length > 0; });
-
-  if (!hasData) {
-    renderStndError(panel, stndActiveType);
-    return;
-  }
+  if (!hasData) { renderStndEmpty(panel, stndActiveType); return; }
 
   var html = '<div class="stnd-grid">';
   STND_EVENTS.forEach(function(ev) {
     var rows = (results[ev] || []).slice(0, 4);
     html += '<div class="stnd-event"><div class="stnd-event-label">' + STND_LABELS[ev] + '</div>';
     if (!rows.length) {
-      html += '<div class="stnd-state-msg" style="padding:1rem 0;text-align:left">No data</div>';
+      html += '<div class="stnd-state-msg" style="padding:.75rem 0;text-align:left;font-size:.56rem">No data entered</div>';
     } else {
       rows.forEach(function(r) {
-        var p1 = r.place === 1 ? ' stnd-p1' : '';
+        var p1 = (r.place == 1) ? ' stnd-p1' : '';
         html += '<div class="stnd-row' + p1 + '">'
           + '<span class="stnd-place">' + r.place + '</span>'
           + '<span class="stnd-info">'
@@ -1642,18 +1640,10 @@ function renderStnd(panel, data, ts) {
   });
   html += '</div>';
   panel.innerHTML = html;
-
-  // Timestamp
-  var updEl = document.getElementById('stnd-updated');
-  if (updEl && ts) {
-    var diff = Math.round((Date.now() - ts) / 60000);
-    updEl.textContent = diff < 2 ? 'Updated just now' : 'Updated ' + diff + 'm ago';
-  }
 }
 
-function renderStndError(panel, type) {
-  var src = STND_SOURCES[type] || STND_SOURCES.state;
-  panel.innerHTML = '<div class="stnd-state-msg">Could not load rankings &mdash; <a href="' + src + '" target="_blank" rel="noopener">view on Athletic.net &#8599;</a></div>';
+function renderStndEmpty(panel, type) {
+  panel.innerHTML = '<div class="stnd-state-msg">No rankings entered yet &mdash; update via Coach Login<br><a href="' + STND_SOURCES[type] + '" target="_blank" rel="noopener" style="margin-top:.5rem;display:inline-block">View on Athletic.net &#8599;</a></div>';
 }
 
 // Auto-load state rankings when section scrolls into view
@@ -1669,6 +1659,68 @@ function renderStndError(panel, type) {
   }, { threshold: 0.1 });
   obs.observe(el);
 })();
+
+// ── STANDINGS COACH EDITOR ─────────────────────────────────────
+var stndEditScope = 'state';
+
+function switchStndEdit(btn, scope) {
+  document.querySelectorAll('.stnd-edit-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  stndEditScope = scope;
+  loadStndEditor(scope);
+}
+
+function loadStndEditor(scope) {
+  dbGet('standings/' + scope).then(function(data) {
+    renderStndEditor(data || {});
+  });
+}
+
+function renderStndEditor(data) {
+  var wrap = document.getElementById('stnd-editor-wrap');
+  if (!wrap) return;
+  var html = '';
+  STND_EVENTS.forEach(function(ev) {
+    var key  = STND_KEYS[ev];
+    var rows = (data[key] || [{},{},{},{}]).slice(0,4);
+    while (rows.length < 4) rows.push({});
+    html += '<div class="stnd-ed-block">'
+      + '<div class="stnd-ed-label">' + STND_LABELS[ev] + '</div>';
+    rows.forEach(function(r, i) {
+      html += '<div class="stnd-ed-row">'
+        + '<span class="stnd-ed-num">' + (i+1) + '</span>'
+        + '<input class="stnd-ed-input" placeholder="Name"   data-ev="'+key+'" data-i="'+i+'" data-f="name"   value="'+escAttr(r.name||'')+'">'
+        + '<input class="stnd-ed-input" placeholder="School" data-ev="'+key+'" data-i="'+i+'" data-f="school" value="'+escAttr(r.school||'')+'">'
+        + '<input class="stnd-ed-input stnd-ed-mark" placeholder="Mark" data-ev="'+key+'" data-i="'+i+'" data-f="mark" value="'+escAttr(r.mark||'')+'">'
+        + '</div>';
+    });
+    html += '</div>';
+  });
+  wrap.innerHTML = html;
+}
+
+async function saveStndEditor() {
+  var wrap = document.getElementById('stnd-editor-wrap');
+  if (!wrap) return;
+  var data = {};
+  STND_EVENTS.forEach(function(ev) { data[STND_KEYS[ev]] = [{},{},{},{}]; });
+  wrap.querySelectorAll('.stnd-ed-input').forEach(function(inp) {
+    var ev = inp.dataset.ev, i = parseInt(inp.dataset.i, 10), f = inp.dataset.f;
+    if (!data[ev]) data[ev] = [{},{},{},{}];
+    data[ev][i] = data[ev][i] || {};
+    data[ev][i][f] = inp.value.trim();
+    data[ev][i].place = i + 1;
+  });
+  // Remove fully empty rows
+  STND_EVENTS.forEach(function(ev) {
+    data[STND_KEYS[ev]] = data[STND_KEYS[ev]].filter(function(r){ return r.name || r.mark; });
+  });
+  var btn = document.getElementById('stnd-save-btn');
+  if (btn) { btn.textContent = 'Saving\u2026'; btn.disabled = true; }
+  await dbSet('standings/' + stndEditScope, data);
+  if (btn) { btn.textContent = 'Saved'; setTimeout(function(){ btn.textContent = 'Save'; btn.disabled = false; }, 1500); }
+  showToast('Standings saved');
+}
 
 // ── PRACTICE TRACKING ─────────────────────────────────────────
 function tAdd() {
