@@ -1,5 +1,9 @@
 [build]
   publish = "."
+  command = ""
+
+[context.production]
+  branch = "main"
 
 [functions]
   directory = "functions"
