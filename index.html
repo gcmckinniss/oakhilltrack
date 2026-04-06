@@ -1174,18 +1174,37 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
 
       <div class="t-view" id="t-standings">
         <p class="t-eyebrow">Ohio Division IV &mdash; Boys</p>
-        <h3 class="t-heading">Edit Standings</h3>
+        <h3 class="t-heading">Update Standings</h3>
         <div class="t-rule"></div>
         <div style="display:flex;gap:.3rem;margin-bottom:1.5rem">
           <button class="stnd-edit-tab active" onclick="switchStndEdit(this,'state')">State</button>
           <button class="stnd-edit-tab" onclick="switchStndEdit(this,'regional')">Regional</button>
           <button class="stnd-edit-tab" onclick="switchStndEdit(this,'district')">District</button>
         </div>
-        <div id="stnd-editor-wrap"></div>
-        <div style="margin-top:1.25rem;display:flex;align-items:center;gap:1rem">
-          <button class="t-add" id="stnd-save-btn" onclick="saveStndEditor()">Save</button>
-          <span style="font-size:.58rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Copy top 4 from <a href="https://www.athletic.net/track-and-field-outdoor/usa/high-school/ohio/division4" target="_blank" rel="noopener" style="color:var(--dim)">Athletic.net &#8599;</a></span>
+
+        <!-- Paste import -->
+        <div class="t-card" style="margin-bottom:1.5rem">
+          <div class="t-card-label">Paste from Athletic.net</div>
+          <div style="font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem">
+            Go to <a href="https://www.athletic.net/track-and-field-outdoor/usa/high-school/ohio/division4" target="_blank" rel="noopener" style="color:var(--dim)">Athletic.net &#8599;</a>, select &amp; copy the rankings, paste below
+          </div>
+          <textarea id="stnd-paste-box" placeholder="Paste rankings text here..." style="width:100%;min-height:140px;font-family:monospace;font-size:.78rem;background:var(--dark2);border:1px solid var(--border);color:var(--white);padding:.75rem;outline:none;resize:vertical;line-height:1.5;transition:border-color .15s;" onfocus="this.style.borderColor='rgba(255,255,255,.3)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+          <div style="display:flex;align-items:center;gap:1rem;margin-top:.75rem">
+            <button class="t-add" id="stnd-parse-btn" onclick="parseStndPaste()">Parse &amp; Save</button>
+            <span id="stnd-parse-msg" style="font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)"></span>
+          </div>
         </div>
+
+        <!-- Manual fallback -->
+        <details style="margin-bottom:1rem">
+          <summary style="font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none;padding:.4rem 0">Manual Edit</summary>
+          <div style="margin-top:1rem">
+            <div id="stnd-editor-wrap"></div>
+            <div style="margin-top:1rem">
+              <button class="t-add" id="stnd-save-btn" onclick="saveStndEditor()">Save</button>
+            </div>
+          </div>
+        </details>
       </div>
 
     </div>
@@ -1720,6 +1739,60 @@ async function saveStndEditor() {
   await dbSet('standings/' + stndEditScope, data);
   if (btn) { btn.textContent = 'Saved'; setTimeout(function(){ btn.textContent = 'Save'; btn.disabled = false; }, 1500); }
   showToast('Standings saved');
+}
+
+async function parseStndPaste() {
+  var box = document.getElementById('stnd-paste-box');
+  var msg = document.getElementById('stnd-parse-msg');
+  var btn = document.getElementById('stnd-parse-btn');
+  var text = box ? box.value.trim() : '';
+  if (!text) { if (msg) msg.textContent = 'Paste some text first.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Parsing\u2026';
+  if (msg) msg.textContent = '';
+
+  var prompt = 'Extract track and field rankings from the text below. Find the top 4 athletes for each of these events: 100 Meter Dash, 200 Meter Dash, 400 Meter Dash, Pole Vault.\n\nFor each athlete extract: place (1-4), full name, school or team name, and mark (time like "11.23" or height like "14-06").\n\nReturn ONLY valid JSON in exactly this format, nothing else:\n{"100 Meter Dash":[{"place":1,"name":"First Last","school":"School Name","mark":"11.23"}],"200 Meter Dash":[],"400 Meter Dash":[],"Pole Vault":[]}\n\nIf an event has no data return an empty array. Include only top 4 per event.\n\nText:\n' + text.slice(0, 6000);
+
+  try {
+    var res = await fetch('/.netlify/functions/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    var json = await res.json();
+    var raw = (json.content && json.content[0] && json.content[0].text) || '';
+    var match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('No JSON in response');
+    var parsed = JSON.parse(match[0]);
+
+    // Convert to Firebase format
+    var data = {};
+    STND_EVENTS.forEach(function(ev) {
+      var rows = (parsed[ev] || []).slice(0, 4).map(function(r, i) {
+        return { place: r.place || (i + 1), name: r.name || '', school: r.school || '', mark: r.mark || '' };
+      }).filter(function(r) { return r.name || r.mark; });
+      data[STND_KEYS[ev]] = rows;
+    });
+
+    await dbSet('standings/' + stndEditScope, data);
+
+    // Clear box, show success
+    box.value = '';
+    btn.textContent = 'Done!';
+    if (msg) msg.textContent = 'Saved to ' + stndEditScope;
+    showToast('Standings updated');
+    setTimeout(function() { btn.textContent = 'Parse & Save'; btn.disabled = false; if (msg) msg.textContent = ''; }, 2500);
+
+    // Refresh editor grid
+    renderStndEditor(data);
+  } catch(e) {
+    btn.textContent = 'Parse & Save'; btn.disabled = false;
+    if (msg) msg.textContent = 'Failed \u2014 try again.';
+  }
 }
 
 // ── PRACTICE TRACKING ─────────────────────────────────────────
