@@ -411,8 +411,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
 .login-field input{font-family:"LeagueSpartan",sans-serif;background:var(--dark2);border:1px solid var(--border);color:var(--white);padding:.9rem 1.1rem;border-radius:3px;font-size:.95rem;outline:none;transition:border-color .15s;text-align:center;width:100%;}
 .login-field input:focus{border-color:rgba(255,255,255,.3);}
 .login-submit{font-family:"LeagueSpartan",sans-serif;width:100%;max-width:320px;font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;background:var(--white);color:var(--black);border:none;padding:.9rem;border-radius:3px;cursor:pointer;transition:opacity .15s;}
-.login-submit:hover{opacity:.88;}
+.login-submit:hover:not(:disabled){opacity:.88;}
+.login-submit:disabled{opacity:.4;cursor:not-allowed;}
 .login-err{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.22);min-height:1rem;}
+.google-signin-btn{font-family:"LeagueSpartan",sans-serif;display:flex;align-items:center;justify-content:center;gap:.65rem;width:100%;max-width:320px;padding:.85rem 1rem;background:var(--dark2);border:1px solid rgba(255,255,255,.22);color:var(--white);font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:background .15s,border-color .15s;border-radius:3px;}
+.google-signin-btn:hover:not(:disabled){background:var(--dark4);border-color:rgba(255,255,255,.4);}
+.google-signin-btn:disabled{opacity:.4;cursor:not-allowed;}
+.login-divider{width:100%;max-width:320px;display:flex;align-items:center;gap:.8rem;margin:-.4rem 0;}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.login-divider span{font-size:.5rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
 
 /* TRACKER BAR */
 .tracker-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 2rem;border-bottom:1px solid var(--border);background:var(--dark2);border-radius:6px 6px 0 0;position:sticky;top:0;z-index:5;}
@@ -895,6 +902,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
       <div style="width:100%;text-align:right;margin-bottom:-1rem"><button onclick="closeCoach()" style="font-family:'LeagueSpartan',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--border);padding:.3rem .72rem;border-radius:2px;cursor:pointer;">&#x2715; Close</button></div>
       <img id="coach-login-logo" alt="Oak Hill Sprints">
       <div class="login-title" id="coach-login-title">Coach Access</div>
+      <button class="google-signin-btn" id="coach-google-btn" onclick="doGoogleModalLogin()">
+        <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true" style="flex-shrink:0">
+          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>
+        </svg>
+        <span id="coach-google-label">Sign in with Google</span>
+      </button>
+      <div class="login-divider"><span>or</span></div>
       <div class="login-field">
         <label for="coach-email">Email</label>
         <input type="email" id="coach-email" placeholder="coach@example.com" autocomplete="username">
@@ -903,7 +920,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
         <label for="coach-pw">Password</label>
         <input type="password" id="coach-pw" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password">
       </div>
-      <button class="login-submit" onclick="tryCoachLogin()">Enter</button>
+      <button class="login-submit" id="coach-pw-btn" onclick="tryCoachLogin()">Enter</button>
       <div class="login-err" id="coach-pw-error"></div>
     </div>
     <div id="tracker-panel" style="display:none">
@@ -1285,10 +1302,40 @@ function closeCoach() {
   var isCoach = currentUser !== null;
   if (pastDB.length > 0) renderPastWorkouts(pastDB, isCoach);
 }
+async function doGoogleModalLogin() {
+  var gBtn = document.getElementById("coach-google-btn");
+  var pwBtn = document.getElementById("coach-pw-btn");
+  var lbl  = document.getElementById("coach-google-label");
+  gBtn.disabled = true; if (pwBtn) pwBtn.disabled = true;
+  lbl.textContent = "Signing in\u2026";
+  try {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    await firebase.auth().signInWithPopup(provider);
+    showTracker();
+  } catch(e) {
+    var errEl = document.getElementById("coach-pw-error");
+    if (e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request") {
+      errEl.textContent = "";
+    } else if (e.code === "auth/unauthorized-domain") {
+      errEl.textContent = "Domain not authorized \u2014 check Firebase Console";
+    } else if (e.code === "auth/operation-not-allowed") {
+      errEl.textContent = "Google sign-in not enabled in Firebase Console";
+    } else {
+      errEl.textContent = "Google sign-in failed. Try again.";
+    }
+    setTimeout(function() { errEl.textContent = ""; }, 4000);
+    lbl.textContent = "Sign in with Google";
+    gBtn.disabled = false; if (pwBtn) pwBtn.disabled = false;
+  }
+}
 async function tryCoachLogin() {
   var emailEl = document.getElementById("coach-email");
   var email = emailEl ? emailEl.value.trim() : "";
   var pw = document.getElementById("coach-pw").value;
+  var gBtn = document.getElementById("coach-google-btn");
+  var pwBtn = document.getElementById("coach-pw-btn");
+  if (pwBtn) { pwBtn.disabled = true; pwBtn.textContent = "Signing in\u2026"; }
+  if (gBtn) gBtn.disabled = true;
   try {
     await firebase.auth().signInWithEmailAndPassword(email, pw);
     document.getElementById("coach-pw").value = "";
@@ -1299,6 +1346,8 @@ async function tryCoachLogin() {
     errEl.textContent = "Invalid email or password";
     document.getElementById("coach-pw").value = "";
     setTimeout(function() { errEl.textContent = ""; }, 2400);
+    if (pwBtn) { pwBtn.disabled = false; pwBtn.textContent = "Enter"; }
+    if (gBtn) gBtn.disabled = false;
   }
 }
 function showTracker() { document.getElementById("coach-login-panel").style.display="none"; document.getElementById("tracker-panel").style.display="block"; tRenderQueue(); }
