@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"storage\\\\\\\\.set\\\\|tracker-db\\\\|meet-db\\\\|video-db\\\\|live-workout\\\\|past-workout\\\\|athletes\" /c/Users/gcmck/Downloads/oakhillsprints_site_v6/index.html)",
+      "Bash(python patch_auth.py)",
+      "Bash(python3 patch_auth.py)",
+      "Bash(py patch_auth.py)",
+      "Bash(node -e \"require\\('fs'\\); console.log\\('node ok'\\)\")",
+      "Bash(node patch_auth.js)",
+      "Bash(rm:*)"
+    ]
+  }
+}
