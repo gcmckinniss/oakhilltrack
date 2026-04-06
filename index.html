@@ -1363,8 +1363,8 @@ async function tryCoachLogin() {
         }
       } catch(_) {}
     }
-    errEl.textContent = "Error: " + (e.code || e.message);
-    setTimeout(function() { errEl.textContent = ""; }, 6000);
+    errEl.textContent = "Invalid email or password";
+    setTimeout(function() { errEl.textContent = ""; }, 2400);
   }
 }
 function showTracker() { document.getElementById("coach-login-panel").style.display="none"; document.getElementById("tracker-panel").style.display="block"; tRenderQueue(); }
