@@ -335,6 +335,31 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
 .re-pr{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);opacity:.8;display:block;text-align:right;}
 .rank-empty{padding:1.5rem 1.2rem;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
 
+/* STANDINGS (Area Rankings) */
+.stnd-scope-tabs{display:flex;gap:.3rem;margin-bottom:2.5rem;}
+.stnd-scope-tab{font-family:"LeagueSpartan",sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:.45rem 1.15rem;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;border-radius:2px;}
+.stnd-scope-tab:hover{color:var(--white);border-color:rgba(255,255,255,.28);}
+.stnd-scope-tab.active{color:var(--white);background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.22);}
+.stnd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:var(--border);}
+.stnd-event{background:var(--dark);padding:1.4rem 1.2rem;}
+.stnd-event-label{font-size:.56rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin-bottom:1rem;padding-bottom:.65rem;border-bottom:1px solid var(--border);}
+.stnd-row{display:flex;align-items:center;gap:.6rem;padding:.52rem 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.stnd-row:last-child{border-bottom:none;}
+.stnd-place{font-size:.66rem;font-weight:700;color:var(--muted);width:1.1rem;text-align:right;flex-shrink:0;}
+.stnd-row.stnd-p1 .stnd-place{color:rgba(212,175,106,.7);}
+.stnd-info{display:flex;flex-direction:column;gap:.1rem;flex:1;min-width:0;}
+.stnd-name{font-size:.84rem;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stnd-school{font-size:.56rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stnd-mark{font-size:1rem;font-weight:700;letter-spacing:-.02em;color:var(--white);flex-shrink:0;}
+.stnd-row.stnd-p1 .stnd-mark{font-size:1.12rem;color:rgba(212,175,106,.9);}
+.stnd-footer{display:flex;align-items:center;justify-content:space-between;margin-top:1.25rem;padding-top:.75rem;border-top:1px solid var(--border);}
+.stnd-updated-txt{font-size:.54rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.stnd-source-link{font-size:.54rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .15s;}
+.stnd-source-link:hover{color:var(--dim);}
+.stnd-state-msg{padding:2.5rem 0;text-align:center;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.stnd-state-msg a{color:var(--dim);text-decoration:none;transition:color .15s;}
+.stnd-state-msg a:hover{color:var(--white);}
+
 /* WORKOUTS */
 .week-meta{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);}
 .week-meta-label{font-size:.58rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--red);opacity:.8;}
@@ -424,7 +449,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
 .login-divider span{font-size:.5rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
 
 /* TRACKER BAR */
-.tracker-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 2rem;border-bottom:1px solid var(--border);background:var(--dark2);border-radius:6px 6px 0 0;position:sticky;top:0;z-index:5;}
+.tracker-bar{display:flex;flex-direction:column;gap:0;border-bottom:1px solid var(--border);background:var(--dark2);border-radius:6px 6px 0 0;position:sticky;top:0;z-index:5;}
+.tr-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.75rem 2rem;}
+.tr-actions{display:flex;gap:.5rem;align-items:center;position:relative;}
+.tr-tabs-row{padding:.4rem 2rem .6rem;border-top:1px solid var(--border);}
 .tr-brand{display:flex;align-items:center;gap:.65rem;flex-shrink:0;}
 .tr-brand img{height:26px;opacity:.7;}
 .tr-brand-text{font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);white-space:nowrap;}
@@ -648,11 +676,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
   .mt-table th:nth-child(5),.mt-table td:nth-child(5){display:none;}
 
   /* TRACKER */
-  .tracker-bar{flex-wrap:wrap;gap:.4rem;padding:.65rem .85rem;}
-  .tr-brand{width:100%;}
-  .tr-tabs{display:flex;overflow-x:auto;flex-wrap:nowrap;width:100%;scrollbar-width:none;padding-bottom:.2rem;gap:.08rem;}
-  .tracker-bar > div:last-child{margin-left:auto;}
-  .tr-tabs::-webkit-scrollbar{display:none;}
+  .tr-top{padding:.6rem .85rem;}
+  .tr-tabs-row{padding:.3rem .85rem .5rem;}
+  .tr-tabs{gap:.08rem;}
   .modal-box{max-height:100vh;border-radius:0;width:100vw;}
   .login-panel{padding:2rem 1.25rem 1.5rem;gap:.75rem;}
   .login-panel img{height:44px;}
@@ -744,6 +770,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
     <a href="#schedule"      class="nav-link">Schedule</a>
     <a href="#rankings"      class="nav-link">Rankings</a>
     <a href="#meet-rankings" class="nav-link">Meet Times</a>
+    <a href="#standings"     class="nav-link">Standings</a>
     <a href="#workouts"      class="nav-link">Workouts</a>
     <a href="#warmup"        class="nav-link">Warmup</a>
     <a href="#videos"        class="nav-link">Videos</a>
@@ -796,6 +823,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
   <a href="#schedule"      class="subnav-link">Schedule</a>
   <a href="#rankings"      class="subnav-link">Rankings</a>
   <a href="#meet-rankings" class="subnav-link">Meet Times</a>
+  <a href="#standings"     class="subnav-link">Standings</a>
   <a href="#my-times"      class="subnav-link">My Times</a>
   <a href="#workouts"      class="subnav-link">Workouts</a>
   <a href="#past-workouts" class="subnav-link">Past Workouts</a>
@@ -844,6 +872,23 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
   </div>
 </section>
 
+
+<section class="section" id="standings">
+  <div class="inner">
+    <p class="sec-eyebrow">Ohio Division IV &mdash; Boys</p>
+    <h2 class="sec-heading">Standings</h2>
+    <div class="stnd-scope-tabs">
+      <button class="stnd-scope-tab active" id="stnd-tab-state"    onclick="switchStnd(this,'state')">State</button>
+      <button class="stnd-scope-tab"        id="stnd-tab-regional" onclick="switchStnd(this,'regional')">Regional</button>
+      <button class="stnd-scope-tab"        id="stnd-tab-district" onclick="switchStnd(this,'district')">District</button>
+    </div>
+    <div id="stnd-panel"></div>
+    <div class="stnd-footer">
+      <span class="stnd-updated-txt" id="stnd-updated"></span>
+      <a class="stnd-source-link" href="https://www.athletic.net/track-and-field-outdoor/usa/high-school/ohio/division4" target="_blank" rel="noopener">Source: Athletic.net &#8599;</a>
+    </div>
+  </div>
+</section>
 
 <section class="section" id="my-times">
   <div class="inner">
@@ -959,25 +1004,33 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;ali
     </div>
     <div id="tracker-panel" style="display:none">
       <div class="tracker-bar">
-        <div class="tr-brand">
-          <img id="tracker-logo" alt="">
-          <span class="tr-brand-text">Performance Tracker</span>
+        <div class="tr-top">
+          <div class="tr-brand">
+            <img id="tracker-logo" alt="">
+            <span class="tr-brand-text">Performance Tracker</span>
+          </div>
+          <div class="tr-actions">
+            <button class="tr-logout" onclick="coachLogout()">Log Out</button>
+            <button class="tr-logout" onclick="showSetPassword()">Set Password</button>
+            <button class="tr-logout" onclick="closeCoach()">&#x2715; Close</button>
+            <div id="set-pw-panel" style="display:none;position:absolute;top:2.4rem;right:0;background:var(--dark3);border:1px solid rgba(255,255,255,.18);padding:1rem 1.1rem;flex-direction:column;gap:.6rem;min-width:230px;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.5);">
+              <div style="font-size:.54rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);">Link a Password</div>
+              <input type="password" id="set-pw-input" placeholder="New password" style="font-family:inherit;background:var(--dark2);border:1px solid var(--border);color:var(--white);padding:.6rem .8rem;font-size:.85rem;outline:none;width:100%;">
+              <button onclick="doSetPassword()" style="font-family:inherit;background:var(--white);color:var(--black);border:none;padding:.6rem;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;">Save</button>
+              <div id="set-pw-msg" style="font-size:.6rem;color:var(--dim);min-height:.9rem;"></div>
+            </div>
+          </div>
         </div>
-        <div class="tr-tabs">
-          <button class="tr-tab active" onclick="switchTTab(this,'t-entry')">Log Entry</button>
-          <button class="tr-tab" onclick="switchTTab(this,'t-rankings')">Rankings</button>
-          <button class="tr-tab" onclick="switchTTab(this,'t-history')">History</button>
-          <button class="tr-tab" onclick="switchTTab(this,'t-meet')">Meet Times</button>
-          <button class="tr-tab" onclick="switchTTab(this,'t-workout')">Import Workout</button>
-          <button class="tr-tab" onclick="switchTTab(this,'t-past')">Past Workouts</button>
-          <button class="tr-tab" onclick="switchTTab(this,'t-videos')">Videos</button>
-        </div>
-        <div style="display:flex;gap:.5rem;align-items:center"><button class="tr-logout" onclick="coachLogout()">Log Out</button><button class="tr-logout" onclick="showSetPassword()">Set Password</button><button class="tr-logout" onclick="closeCoach()">&#x2715; Close</button></div>
-        <div id="set-pw-panel" style="display:none;position:absolute;top:3.2rem;right:0;background:var(--dark3);border:1px solid rgba(255,255,255,.18);padding:1rem 1.1rem;flex-direction:column;gap:.6rem;min-width:230px;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.5);">
-          <div style="font-size:.54rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);">Link a Password</div>
-          <input type="password" id="set-pw-input" placeholder="New password" style="font-family:inherit;background:var(--dark2);border:1px solid var(--border);color:var(--white);padding:.6rem .8rem;font-size:.85rem;outline:none;width:100%;">
-          <button onclick="doSetPassword()" style="font-family:inherit;background:var(--white);color:var(--black);border:none;padding:.6rem;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;">Save</button>
-          <div id="set-pw-msg" style="font-size:.6rem;color:var(--dim);min-height:.9rem;"></div>
+        <div class="tr-tabs-row">
+          <div class="tr-tabs">
+            <button class="tr-tab active" onclick="switchTTab(this,'t-entry')">Log Entry</button>
+            <button class="tr-tab" onclick="switchTTab(this,'t-rankings')">Rankings</button>
+            <button class="tr-tab" onclick="switchTTab(this,'t-history')">History</button>
+            <button class="tr-tab" onclick="switchTTab(this,'t-meet')">Meet Times</button>
+            <button class="tr-tab" onclick="switchTTab(this,'t-workout')">Import Workout</button>
+            <button class="tr-tab" onclick="switchTTab(this,'t-past')">Past Workouts</button>
+            <button class="tr-tab" onclick="switchTTab(this,'t-videos')">Videos</button>
+          </div>
         </div>
       </div>
 
@@ -1477,6 +1530,13 @@ function coachLogout() {
   document.getElementById("coach-pw").value="";
   var emailEl = document.getElementById("coach-email");
   if (emailEl) emailEl.value = "";
+  // Reset Google button in case it was left in a loading state
+  var gBtn = document.getElementById("coach-google-btn");
+  var lbl  = document.getElementById("coach-google-label");
+  var pwBtn = document.getElementById("coach-pw-btn");
+  if (gBtn) gBtn.disabled = false;
+  if (lbl)  lbl.textContent = "Sign in with Google";
+  if (pwBtn) pwBtn.disabled = false;
   if (pastDB && pastDB.length > 0) renderPastWorkouts(pastDB, false);
 }
 function switchTTab(btn, id) {
@@ -1488,6 +1548,127 @@ function switchTTab(btn, id) {
   if (id==="t-videos")   vRender();
   if (id==="t-past")     renderPastCoach();
 }
+
+// ── STANDINGS ─────────────────────────────────────────────────
+var stndActiveType = 'state';
+var stndLoaded = {};
+var STND_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+var STND_EVENTS = ['100 Meter Dash', '200 Meter Dash', '400 Meter Dash', 'Pole Vault'];
+var STND_LABELS = {'100 Meter Dash':'100M','200 Meter Dash':'200M','400 Meter Dash':'400M','Pole Vault':'Vault'};
+var STND_SOURCES = {
+  state: 'https://www.athletic.net/track-and-field-outdoor/usa/high-school/ohio/division4',
+  regional: 'https://www.athletic.net/TrackAndField/rankings/list/178540/m',
+  district: 'https://www.athletic.net/TrackAndField/rankings/list/178541/m'
+};
+
+function switchStnd(btn, type) {
+  document.querySelectorAll('.stnd-scope-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  stndActiveType = type;
+  // Update source link
+  var srcLink = document.querySelector('.stnd-source-link');
+  if (srcLink) srcLink.href = STND_SOURCES[type] || STND_SOURCES.state;
+  loadStnd(type);
+}
+
+function loadStnd(type) {
+  var panel = document.getElementById('stnd-panel');
+  if (!panel) return;
+
+  // Check localStorage cache
+  var cacheKey = 'stnd_' + type + '_v2';
+  var tsKey    = 'stnd_ts_' + type + '_v2';
+  var cached   = null;
+  var ts       = 0;
+  try {
+    cached = localStorage.getItem(cacheKey);
+    ts     = parseInt(localStorage.getItem(tsKey) || '0', 10);
+  } catch(e){}
+
+  if (cached && (Date.now() - ts < STND_CACHE_TTL)) {
+    try {
+      renderStnd(panel, JSON.parse(cached), ts);
+      return;
+    } catch(e){}
+  }
+
+  // Show skeleton
+  panel.innerHTML = '<div class="stnd-state-msg">Loading\u2026</div>';
+
+  fetch('/.netlify/functions/rankings?type=' + type)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      var now = Date.now();
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(tsKey, String(now));
+      } catch(e){}
+      renderStnd(panel, data, now);
+    })
+    .catch(function() {
+      renderStndError(panel, type);
+    });
+}
+
+function renderStnd(panel, data, ts) {
+  var results = data.results || {};
+  var hasData = STND_EVENTS.some(function(e){ return results[e] && results[e].length > 0; });
+
+  if (!hasData) {
+    renderStndError(panel, stndActiveType);
+    return;
+  }
+
+  var html = '<div class="stnd-grid">';
+  STND_EVENTS.forEach(function(ev) {
+    var rows = (results[ev] || []).slice(0, 4);
+    html += '<div class="stnd-event"><div class="stnd-event-label">' + STND_LABELS[ev] + '</div>';
+    if (!rows.length) {
+      html += '<div class="stnd-state-msg" style="padding:1rem 0;text-align:left">No data</div>';
+    } else {
+      rows.forEach(function(r) {
+        var p1 = r.place === 1 ? ' stnd-p1' : '';
+        html += '<div class="stnd-row' + p1 + '">'
+          + '<span class="stnd-place">' + r.place + '</span>'
+          + '<span class="stnd-info">'
+          +   '<span class="stnd-name">'   + escAttr(r.name)   + '</span>'
+          +   '<span class="stnd-school">' + escAttr(r.school) + '</span>'
+          + '</span>'
+          + '<span class="stnd-mark">' + escAttr(r.mark) + '</span>'
+          + '</div>';
+      });
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  panel.innerHTML = html;
+
+  // Timestamp
+  var updEl = document.getElementById('stnd-updated');
+  if (updEl && ts) {
+    var diff = Math.round((Date.now() - ts) / 60000);
+    updEl.textContent = diff < 2 ? 'Updated just now' : 'Updated ' + diff + 'm ago';
+  }
+}
+
+function renderStndError(panel, type) {
+  var src = STND_SOURCES[type] || STND_SOURCES.state;
+  panel.innerHTML = '<div class="stnd-state-msg">Could not load rankings &mdash; <a href="' + src + '" target="_blank" rel="noopener">view on Athletic.net &#8599;</a></div>';
+}
+
+// Auto-load state rankings when section scrolls into view
+(function(){
+  var el = document.getElementById('standings');
+  if (!el) return;
+  var loaded = false;
+  var obs = new IntersectionObserver(function(entries){
+    if (entries[0].isIntersecting && !loaded) {
+      loaded = true;
+      loadStnd('state');
+    }
+  }, { threshold: 0.1 });
+  obs.observe(el);
+})();
 
 // ── PRACTICE TRACKING ─────────────────────────────────────────
 function tAdd() {

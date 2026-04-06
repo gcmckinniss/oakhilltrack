@@ -16,3 +16,6 @@
 
 [functions.claude]
   timeout = 30
+
+[functions.rankings]
+  timeout = 20
