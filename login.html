@@ -16,7 +16,7 @@
     --dim:   #888;
     --muted: #555;
     --border: rgba(255,255,255,0.08);
-    --border-focus: rgba(255,255,255,0.28);
+    --border-hi: rgba(255,255,255,0.28);
   }
   body {
     background: var(--black);
@@ -50,20 +50,19 @@
     letter-spacing: -.02em;
     text-transform: uppercase;
     line-height: 1;
-    color: var(--white);
   }
   .rule { height: 1px; background: var(--border); }
 
-  /* ── Google button ─────────────────────────────────────────── */
+  /* Google button */
   .google-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: .75rem;
     width: 100%;
-    padding: .78rem 1rem;
+    padding: .8rem 1rem;
     background: var(--dark2);
-    border: 1px solid var(--border-focus);
+    border: 1px solid var(--border-hi);
     color: var(--white);
     font-family: inherit;
     font-size: .68rem;
@@ -72,34 +71,24 @@
     text-transform: uppercase;
     cursor: pointer;
     transition: background .15s, border-color .15s;
+    position: relative;
   }
-  .google-btn:hover { background: var(--dark4); border-color: rgba(255,255,255,.45); }
-  .google-btn:disabled { opacity: .4; cursor: not-allowed; }
-  .google-btn svg { flex-shrink: 0; }
+  .google-btn:hover:not(:disabled) { background: var(--dark4); border-color: rgba(255,255,255,.45); }
+  .google-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .google-btn .g-label { pointer-events: none; }
 
-  /* ── Divider ───────────────────────────────────────────────── */
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: .9rem;
-  }
-  .divider::before,
-  .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+  /* Divider */
+  .divider { display: flex; align-items: center; gap: .9rem; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
   .divider span {
     font-size: .55rem;
     font-weight: 700;
     letter-spacing: .18em;
     text-transform: uppercase;
     color: var(--muted);
-    white-space: nowrap;
   }
 
-  /* ── Email / password form ─────────────────────────────────── */
+  /* Email / password */
   .fields { display: flex; flex-direction: column; gap: .9rem; }
   .field  { display: flex; flex-direction: column; gap: .4rem; }
   label {
@@ -121,7 +110,7 @@
     width: 100%;
   }
   input::placeholder { color: var(--muted); }
-  input:focus { border-color: var(--border-focus); }
+  input:focus { border-color: var(--border-hi); }
   .submit-btn {
     width: 100%;
     padding: .85rem;
@@ -137,14 +126,15 @@
     transition: opacity .15s;
     margin-top: .2rem;
   }
-  .submit-btn:hover { opacity: .88; }
+  .submit-btn:hover:not(:disabled) { opacity: .88; }
   .submit-btn:disabled { opacity: .4; cursor: not-allowed; }
+
   .error {
     font-size: .68rem;
     color: #c0392b;
     letter-spacing: .05em;
     min-height: 1.1rem;
-    margin-top: .3rem;
+    margin-top: .35rem;
   }
   .back-link {
     font-size: .58rem;
@@ -158,7 +148,6 @@
   }
   .back-link:hover { color: var(--dim); }
 </style>
-<!-- Firebase Auth SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
@@ -172,22 +161,18 @@
 
   <div class="rule"></div>
 
-  <!-- Google Sign-In -->
   <button class="google-btn" id="google-btn" onclick="doGoogleLogin()">
-    <!-- Google "G" logo -->
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" style="flex-shrink:0">
       <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
       <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
       <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
       <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>
     </svg>
-    Sign in with Google
+    <span class="g-label" id="google-label">Sign in with Google</span>
   </button>
 
-  <!-- Divider -->
   <div class="divider"><span>or</span></div>
 
-  <!-- Email / Password -->
   <div class="fields">
     <div class="field">
       <label for="email">Email</label>
@@ -207,8 +192,6 @@
 </div>
 
 <script>
-  // ── Firebase config — replace with values from Firebase Console ──────────
-  // Firebase Console → Project Settings → Your apps → SDK setup
   const firebaseConfig = {
     apiKey: "AIzaSyAS722iY5fXNLoaimZ-MRUXRbTbp0ow8QY",
     authDomain: "oakhillsprints.firebaseapp.com",
@@ -220,81 +203,71 @@
   };
   firebase.initializeApp(firebaseConfig);
 
-  // Redirect immediately if already signed in
+  // Redirect if already signed in
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) window.location.href = "index.html";
   });
 
-  // Enter key on email/password fields
-  ["email", "password"].forEach(function(id) {
-    document.getElementById(id).addEventListener("keydown", function(e) {
-      if (e.key === "Enter") doEmailLogin();
-    });
-  });
+  // Enter key submits email form
+  document.getElementById("email").addEventListener("keydown", function(e) { if (e.key === "Enter") doEmailLogin(); });
+  document.getElementById("password").addEventListener("keydown", function(e) { if (e.key === "Enter") doEmailLogin(); });
 
-  function setLoading(loading, targetBtn, originalLabel) {
-    var googleBtn = document.getElementById("google-btn");
-    var loginBtn  = document.getElementById("login-btn");
-    googleBtn.disabled = loading;
-    loginBtn.disabled  = loading;
-    if (targetBtn) targetBtn.textContent = loading ? "Signing in\u2026" : originalLabel;
+  var busy = false;
+
+  function setBusy(state) {
+    busy = state;
+    document.getElementById("google-btn").disabled = state;
+    document.getElementById("login-btn").disabled  = state;
   }
+  function showError(msg) { document.getElementById("error-msg").textContent = msg; }
+  function clearError()   { document.getElementById("error-msg").textContent = ""; }
 
-  // ── Google Sign-In ───────────────────────────────────────────────────────
+  // ── Google Sign-In ────────────────────────────────────────────────────────
   async function doGoogleLogin() {
+    if (busy) return;
     clearError();
-    setLoading(true, document.getElementById("google-btn"), "Sign in with Google");
-    // Re-insert the SVG after textContent wipe — swap to a label-only approach
-    document.getElementById("google-btn").innerHTML =
-      '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">' +
-      '<path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>' +
-      '<path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>' +
-      '<path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>' +
-      '<path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>' +
-      '</svg> Signing in\u2026';
+    setBusy(true);
+    document.getElementById("google-label").textContent = "Signing in\u2026";
     try {
       var provider = new firebase.auth.GoogleAuthProvider();
       await firebase.auth().signInWithPopup(provider);
-      // onAuthStateChanged will redirect
+      // onAuthStateChanged handles redirect
     } catch(e) {
-      showError(e.code === "auth/popup-closed-by-user"
-        ? "Sign-in cancelled."
-        : "Google sign-in failed. Try again.");
-      resetGoogleBtn();
-      setLoading(false, null, null);
+      var msg = "Google sign-in failed. Try again.";
+      if (e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request") {
+        msg = "Sign-in cancelled.";
+      } else if (e.code === "auth/unauthorized-domain") {
+        msg = "This domain is not authorized in Firebase. Add it under Authentication \u2192 Authorized domains.";
+      } else if (e.code === "auth/operation-not-allowed") {
+        msg = "Google sign-in is not enabled in Firebase Console.";
+      }
+      showError(msg);
+      document.getElementById("google-label").textContent = "Sign in with Google";
+      setBusy(false);
     }
   }
 
-  function resetGoogleBtn() {
-    document.getElementById("google-btn").innerHTML =
-      '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">' +
-      '<path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>' +
-      '<path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>' +
-      '<path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>' +
-      '<path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>' +
-      '</svg> Sign in with Google';
-  }
-
-  // ── Email / Password Sign-In ─────────────────────────────────────────────
+  // ── Email / Password Sign-In ──────────────────────────────────────────────
   async function doEmailLogin() {
+    if (busy) return;
     clearError();
     var email    = document.getElementById("email").value.trim();
     var password = document.getElementById("password").value;
-    if (!email || !password) { showError("Enter email and password."); return; }
-    var btn = document.getElementById("login-btn");
-    setLoading(true, btn, "Sign In");
+    if (!email || !password) { showError("Enter your email and password."); return; }
+    setBusy(true);
+    document.getElementById("login-btn").textContent = "Signing in\u2026";
     try {
       await firebase.auth().signInWithEmailAndPassword(email, password);
-      // onAuthStateChanged will redirect
+      // onAuthStateChanged handles redirect
     } catch(e) {
-      showError("Invalid email or password.");
+      var msg = "Invalid email or password.";
+      if (e.code === "auth/too-many-requests") msg = "Too many attempts. Try again later.";
+      showError(msg);
       document.getElementById("password").value = "";
-      setLoading(false, btn, "Sign In");
+      document.getElementById("login-btn").textContent = "Sign In";
+      setBusy(false);
     }
   }
-
-  function showError(msg) { document.getElementById("error-msg").textContent = msg; }
-  function clearError()   { document.getElementById("error-msg").textContent = ""; }
 </script>
 </body>
 </html>
